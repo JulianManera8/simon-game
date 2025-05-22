@@ -45,10 +45,10 @@ export default function SimonGame() {
   }, [])
 
   useEffect(() => {
-  if (gameStarted && sequence.length === 0 && !gameOver) {
-    addToSequence()
-  }
-}, [sequence, gameStarted, gameOver])
+    if (gameStarted && sequence.length === 0 && !gameOver) {
+      addToSequence()
+    }
+  }, [sequence, gameStarted, gameOver])
 
   useEffect(() => {
     // Verificar si el usuario ha completado la secuencia correctamente
@@ -109,7 +109,7 @@ export default function SimonGame() {
           setCurrentPlayingBird(null)
           resolve()
         }
-      }, 3000)
+      }, 1000)
     })
   }
 
@@ -135,23 +135,35 @@ export default function SimonGame() {
   }
 
   const addToSequence = () => {
-    let newSequence = [...sequence]
+    const usedCounts = [0, 0, 0, 0]
+    sequence.forEach((index) => {
+      usedCounts[index]++
+    })
 
-    if (newSequence.length === 0) {
-      newSequence = [0]
-    } else if (newSequence.length === 1) {
-      newSequence = [0, 1]
-    } else {
-      const newBird = Math.floor(Math.random() * 4)
-      newSequence.push(newBird)
-    }
+    const last = sequence[sequence.length - 1]
+    const secondLast = sequence[sequence.length - 2]
 
+    let newBird
+    const maxAttempts = 10
+    let attempts = 0
+
+    do {
+      newBird = Math.floor(Math.random() * 4)
+      attempts++
+    } while (
+      // Evitar 3 veces seguidas
+      (last === newBird && secondLast === newBird) ||
+      // Si estamos en nivel 3 o más, asegurar que no queden pájaros sin sonar
+      (sequence.length >= 3 && usedCounts.includes(0) && usedCounts[newBird] > 0 && attempts < maxAttempts)
+    )
+
+    const newSequence = [...sequence, newBird]
     setSequence(newSequence)
     setLevel(newSequence.length)
 
     setTimeout(() => {
       playSequence(newSequence)
-    }, 1000)
+    }, 200)
   }
 
   const handleBirdClick = async (index) => {
@@ -250,8 +262,12 @@ export default function SimonGame() {
                 disabled={isButtonDisabled(birdIndex)}
                 className={`
                   ${activeBird === birdIndex ? birdActiveColors[birdIndex] : birdColors[birdIndex]}
-                  h-32 rounded-lg flex items-center justify-center transition-colors
-                  ${isPlayingSound && currentPlayingBird !== birdIndex ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}
+                  h-32 rounded-lg flex items-center justify-center transition-all duration-300 ease-in-out
+                  ${playingSequence || isPlayingSound ? (
+                    currentPlayingBird === birdIndex
+                      ? "brightness-125 scale-105 shadow-lg ring-2 ring-offset-2"
+                      : "opacity-40 cursor-not-allowed outline-none"
+                  ) : "cursor-pointer"}
                   disabled:opacity-70 focus:outline-none focus:ring-2 focus:ring-offset-2
                 `}
                 aria-label={`Pájaro ${birdIndex + 1}`}
