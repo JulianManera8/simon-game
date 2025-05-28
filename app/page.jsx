@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Bird, Volume2, Play, RefreshCw } from "lucide-react"
+import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog"
 
 export default function SimonGame() {
   const [sequence, setSequence] = useState([])
@@ -16,32 +17,29 @@ export default function SimonGame() {
   const [isPlayingSound, setIsPlayingSound] = useState(false)
   const [currentPlayingBird, setCurrentPlayingBird] = useState(null)
   const [activeBird, setActiveBird] = useState(null)
-
-  const birdSounds = ["/sounds/bird1.mp3", "/sounds/bird2.mp3", "/sounds/bird3.mp3", "/sounds/bird4.mp3"]
+  const [isDialogOpen, setIsDialogOpen] = useState(false)
+  
   const audioRefs = useRef([null, null, null, null])
 
-  const birdColors = [
-    "bg-red-500 hover:bg-red-600",
-    "bg-blue-500 hover:bg-blue-600",
-    "bg-yellow-500 hover:bg-yellow-600",
-    "bg-green-500 hover:bg-green-600",
-  ]
-
+  const birds = ["Benteveo", "Cardenal", "Hornero", "Tero"]
+  const birdSounds = ["/sounds/benteveo.mp3", "/sounds/cardenal.mp3", "/sounds/hornero.mp3", "/sounds/tero.mp3"]
+  const birdColors = [ "bg-red-500 hover:bg-red-600", "bg-blue-500 hover:bg-blue-600", "bg-yellow-500 hover:bg-yellow-600", "bg-green-500 hover:bg-green-600"]
   const birdActiveColors = ["bg-red-300", "bg-blue-300", "bg-yellow-300", "bg-green-300"]
 
   useEffect(() => {
     // Cargar los sonidos
     birdSounds.forEach((sound, index) => {
-      const audio = new Audio(sound)
-      audio.preload = "auto"
-      audioRefs.current[index] = audio
+      const audio = new Audio(sound);
+      audio.preload = "auto";
+      audioRefs.current[index] = audio;
     })
-
+    
     // Recuperar puntuación máxima del localStorage
-    const savedHighScore = localStorage.getItem("simonBirdHighScore")
+    const savedHighScore = localStorage.getItem("simonBirdHighScore");
     if (savedHighScore) {
-      setHighScore(Number.parseInt(savedHighScore))
+      setHighScore(Number.parseInt(savedHighScore));
     }
+
   }, [])
 
   useEffect(() => {
@@ -109,7 +107,7 @@ export default function SimonGame() {
           setCurrentPlayingBird(null)
           resolve()
         }
-      }, 1000)
+      }, 1500)
     })
   }
 
@@ -198,6 +196,7 @@ export default function SimonGame() {
 
   const gameEnd = () => {
     setGameOver(true)
+    setIsDialogOpen(true)
     setGameStarted(false)
     setPlayingSequence(false)
 
@@ -206,24 +205,6 @@ export default function SimonGame() {
       if (audio) {
         audio.pause()
         audio.currentTime = 0
-      }
-    })
-
-    // Reproducir sonido de error (todos los pájaros en secuencia)
-    audioRefs.current.forEach((audio, i) => {
-      if (audio) {
-        setTimeout(() => {
-          audio.currentTime = 0
-          audio.play()
-
-          // Limitar la duración
-          setTimeout(() => {
-            if (!audio.paused) {
-              audio.pause()
-              audio.currentTime = 0
-            }
-          }, 500)
-        }, i * 300)
       }
     })
 
@@ -245,7 +226,7 @@ export default function SimonGame() {
         <CardHeader className="text-center">
           <CardTitle className="text-3xl flex items-center justify-center gap-2">
             <Bird className="h-8 w-8" />
-            Simon de Pájaros
+            Sinfonía de Pájaros
           </CardTitle>
           <CardDescription>
             Escucha y repite la secuencia de sonidos de pájaros.
@@ -255,7 +236,7 @@ export default function SimonGame() {
 
         <CardContent>
           <div className="grid grid-cols-2 gap-4 mb-6">
-            {[0, 1, 2, 3].map((birdIndex) => (
+            {birds.map((name, birdIndex) => (
               <button
                 key={birdIndex}
                 onClick={() => handleBirdClick(birdIndex)}
@@ -273,6 +254,7 @@ export default function SimonGame() {
                 aria-label={`Pájaro ${birdIndex + 1}`}
               >
                 <Volume2 className="h-12 w-12 text-white" />
+                <p className="font-bold text-white mx-2"> {name} </p>
               </button>
             ))}
           </div>
@@ -292,11 +274,6 @@ export default function SimonGame() {
             </div>
           )}          
 
-          {gameOver && (
-            <div className="mt-4 text-center text-sm font-medium text-red-600">
-              ¡Perdiste! Tocá "Jugar de nuevo" para intentarlo otra vez.
-            </div>
-          )}
         </CardContent>
 
         <CardFooter className="flex justify-center">
@@ -315,6 +292,28 @@ export default function SimonGame() {
           </Button>
         </CardFooter>
       </Card>
+
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="text-lg">Perdiste 😔 </DialogTitle>
+            <DialogDescription className="text-black/80 text-md">
+              Te equivocaste en la secuencia. ¿Querés intentarlo otra vez?
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              className="bg-violet-700 hover:bg-violet-600 cursor-pointer"
+              onClick={() => {
+                setIsDialogOpen(false)
+                startGame()
+              }}
+            >
+              Jugar de nuevo
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
