@@ -18,7 +18,9 @@ export default function SimonGame() {
   const [currentPlayingBird, setCurrentPlayingBird] = useState(null)
   const [activeBird, setActiveBird] = useState(null)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
-  
+  const [isWinDialogOpen, setIsWinDialogOpen] = useState(false)
+  const [isStartDialogOpen, setIsStartDialogOpen] = useState(true)
+
   const audioRefs = useRef([null, null, null, null])
 
   const birds = ["Benteveo", "Cardenal", "Hornero", "Tero"]
@@ -49,24 +51,25 @@ export default function SimonGame() {
   }, [sequence, gameStarted, gameOver])
 
   useEffect(() => {
-    // Verificar si el usuario ha completado la secuencia correctamente
     if (userSequence.length > 0 && sequence.length > 0) {
-      // Verificar si el último input del usuario es correcto
       const index = userSequence.length - 1
       if (userSequence[index] !== sequence[index]) {
         gameEnd()
         return
       }
 
-      // Si el usuario completó la secuencia correctamente
       if (userSequence.length === sequence.length) {
-        // Actualizar puntuación máxima si es necesario
+        // Nivel de victoria
+        if (level + 1 === 6) {
+          setIsWinDialogOpen(true)
+          return
+        }
+
         if (level > highScore) {
           setHighScore(level)
           localStorage.setItem("simonBirdHighScore", level.toString())
         }
 
-        // Pausa antes de la siguiente ronda
         setTimeout(() => {
           setUserSequence([])
           addToSequence()
@@ -74,6 +77,7 @@ export default function SimonGame() {
       }
     }
   }, [userSequence, sequence, level, highScore])
+
 
   const playSound = (index) => {
     return new Promise((resolve) => {
@@ -293,6 +297,26 @@ export default function SimonGame() {
         </CardFooter>
       </Card>
 
+      {/* Pantalla de Inicio */}
+      <Dialog open={isStartDialogOpen} onOpenChange={setIsStartDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="text-2xl font-bold">¡Bienvenido a Sinfonía de Pájaros!</DialogTitle>
+            <DialogDescription className="text-black/80">
+              Memoriza la secuencia de sonidos de los pájaros y repítela correctamente. ¡Buena suerte!
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              className="bg-violet-700 hover:bg-violet-600 cursor-pointer"
+              onClick={() => setIsStartDialogOpen(false)}
+            >
+              Comenzar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent>
           <DialogHeader>
@@ -314,6 +338,29 @@ export default function SimonGame() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <Dialog open={isWinDialogOpen} onOpenChange={setIsWinDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="text-lg">¡Felicidades! 🎉</DialogTitle>
+            <DialogDescription className="text-black/80 text-md">
+              ¡Completaste el nivel 5, ya sos especialista en canto de pájaros!
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              className="bg-green-600 hover:bg-green-500 cursor-pointer"
+              onClick={() => {
+                setIsWinDialogOpen(false)
+                startGame()
+              }}
+            >
+              Jugar de nuevo
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
     </div>
   )
 }
