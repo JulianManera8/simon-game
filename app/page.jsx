@@ -20,6 +20,7 @@ export default function SimonGame() {
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [isWinDialogOpen, setIsWinDialogOpen] = useState(false)
   const [isStartDialogOpen, setIsStartDialogOpen] = useState(true)
+  const [waitingNextLevel, setWaitingNextLevel] = useState(false)
 
   const audioRefs = useRef([null, null, null, null])
 
@@ -70,9 +71,11 @@ export default function SimonGame() {
           localStorage.setItem("simonBirdHighScore", level.toString())
         }
 
+        setWaitingNextLevel(true)
         setTimeout(() => {
           setUserSequence([])
           addToSequence()
+          setWaitingNextLevel(false)
         }, 1000)
       }
     }
@@ -221,7 +224,7 @@ export default function SimonGame() {
 
   // Determinar si un botón debe estar deshabilitado
   const isButtonDisabled = (birdIndex) => {
-    return playingSequence || gameOver || (isPlayingSound && currentPlayingBird !== birdIndex)
+    return playingSequence || gameOver || waitingNextLevel || (isPlayingSound && currentPlayingBird !== birdIndex)
   }
 
   return (
@@ -233,8 +236,8 @@ export default function SimonGame() {
             Sinfonía de Pájaros
           </CardTitle>
           <CardDescription>
-            Escucha y repite la secuencia de sonidos de pájaros.
-            {!gameStarted && !gameOver && " Puedes probar los sonidos antes de comenzar."}
+            Escuchá y repetí la secuencia de sonidos de pájaros.
+            {!gameStarted && !gameOver && "Puedes probar los sonidos antes de comenzar."}
           </CardDescription>
         </CardHeader>
 
@@ -301,9 +304,9 @@ export default function SimonGame() {
       <Dialog open={isStartDialogOpen} onOpenChange={setIsStartDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle className="text-2xl font-bold">¡Bienvenido a Sinfonía de Pájaros!</DialogTitle>
+            <DialogTitle className="text-2xl font-bold">Te damos la bienvenida a Sinfonía de Pájaros!</DialogTitle>
             <DialogDescription className="text-black/80">
-              Memoriza la secuencia de sonidos de los pájaros y repítela correctamente. ¡Buena suerte!
+              Memorizá la secuencia de sonidos de los pájaros y repetíla correctamente. ¡Buena suerte!
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
@@ -322,7 +325,7 @@ export default function SimonGame() {
           <DialogHeader>
             <DialogTitle className="text-lg">Perdiste 😔 </DialogTitle>
             <DialogDescription className="text-black/80 text-md">
-              Te equivocaste en la secuencia. ¿Querés intentarlo otra vez?
+              Te equivocaste en la secuencia. ¿Querés jugar de nuevo?
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
