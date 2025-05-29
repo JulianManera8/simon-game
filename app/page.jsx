@@ -25,8 +25,9 @@ export default function SimonGame() {
   const audioRefs = useRef([null, null, null, null])
 
   const birds = ["Benteveo", "Cardenal", "Hornero", "Tero"]
+  const birdsImages = ["/images/benteveo.png", "/images/cardenal.png", "/images/hornero.png", "/images/tero.png"]
   const birdSounds = ["/sounds/benteveo.mp3", "/sounds/cardenal.mp3", "/sounds/hornero.mp3", "/sounds/tero.mp3"]
-  const birdColors = [ "bg-red-500 hover:bg-red-600", "bg-blue-500 hover:bg-blue-600", "bg-yellow-500 hover:bg-yellow-600", "bg-green-500 hover:bg-green-600"]
+  const birdColors = [ "bg-red-300 hover:bg-red-400", "bg-blue-300 hover:bg-blue-400", "bg-yellow-200 hover:bg-yellow-400", "bg-green-300 hover:bg-green-400"]
   const birdActiveColors = ["bg-red-300", "bg-blue-300", "bg-yellow-300", "bg-green-300"]
 
   useEffect(() => {
@@ -241,30 +242,35 @@ export default function SimonGame() {
           </CardDescription>
         </CardHeader>
 
-        <CardContent>
-          <div className="grid grid-cols-2 gap-4 mb-6">
-            {birds.map((name, birdIndex) => (
-              <button
-                key={birdIndex}
-                onClick={() => handleBirdClick(birdIndex)}
-                disabled={isButtonDisabled(birdIndex)}
-                className={`
-                  ${activeBird === birdIndex ? birdActiveColors[birdIndex] : birdColors[birdIndex]}
-                  h-32 rounded-lg flex items-center justify-center transition-all duration-300 ease-in-out
-                  ${playingSequence || isPlayingSound ? (
-                    currentPlayingBird === birdIndex
-                      ? "brightness-125 scale-105 shadow-lg ring-2 ring-offset-2"
-                      : "opacity-40 cursor-not-allowed outline-none"
-                  ) : "cursor-pointer"}
-                  disabled:opacity-70 focus:outline-none focus:ring-2 focus:ring-offset-2
-                `}
-                aria-label={`Pájaro ${birdIndex + 1}`}
-              >
-                <Volume2 className="h-12 w-12 text-white" />
-                <p className="font-bold text-white mx-2"> {name} </p>
-              </button>
-            ))}
-          </div>
+        <CardContent>          
+        <div className="grid grid-cols-2 gap-4 mb-6">
+          {birds.map((name, birdIndex) => (
+            <button
+              key={birdIndex}
+              onClick={() => handleBirdClick(birdIndex)}
+              disabled={isButtonDisabled(birdIndex)}
+              className={`
+                relative
+                ${activeBird === birdIndex ? birdActiveColors[birdIndex] : birdColors[birdIndex]}
+                h-32 rounded-lg flex flex-col items-center justify-center transition-all duration-300 ease-in-out
+                ${playingSequence || isPlayingSound ? (
+                  currentPlayingBird === birdIndex
+                    ? "brightness-125 scale-105 shadow-lg ring-2 ring-offset-2"
+                    : "opacity-40 cursor-not-allowed outline-none"
+                ) : "cursor-pointer"}
+                disabled:opacity-70 focus:outline-none focus:ring-2 focus:ring-offset-2
+              `}
+              aria-label={`Pájaro ${birdIndex + 1}`}
+            >
+              <img
+                src={birdsImages[birdIndex]}
+                alt={name}
+                className="h-22 w-full object-contain shadow-md drop-shadow-black/55"
+              />
+              <p className="font-bold text-white text-sm mt-2">{name}</p>
+            </button>
+          ))}
+        </div>
 
           <div className="flex justify-between items-center">
             <div className="text-lg font-semibold">Nivel: {level}</div>
