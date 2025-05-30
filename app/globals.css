@@ -120,3 +120,9 @@
     @apply bg-background text-foreground;
   }
 }
+
+.luckiest-guy-regular {
+  font-family: "Luckiest Guy", cursive;
+  font-weight: 400;
+  font-style: normal;
+}

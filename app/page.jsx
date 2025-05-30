@@ -24,11 +24,18 @@ export default function SimonGame() {
 
   const audioRefs = useRef([null, null, null, null])
 
-  const birds = ["Benteveo", "Cardenal", "Hornero", "Tero"]
-  const birdsImages = ["/images/benteveo.png", "/images/cardenal.png", "/images/hornero.png", "/images/tero.png"]
-  const birdSounds = ["/sounds/benteveo.mp3", "/sounds/cardenal.mp3", "/sounds/hornero.mp3", "/sounds/tero.mp3"]
-  const birdColors = [ "bg-red-300 hover:bg-red-400", "bg-blue-300 hover:bg-blue-400", "bg-yellow-200 hover:bg-yellow-400", "bg-green-300 hover:bg-green-400"]
-  const birdActiveColors = ["bg-red-300", "bg-blue-300", "bg-yellow-300", "bg-green-300"]
+  // 1 TOPLEFT TERO - ROJO #DA2B24 PRENDIDO / #EB6351 APAGADO
+  // 2 TOPRIGHT HORNERO - VERDE #179258 PRENDIDO / #377261 APAGADO
+  // 3 BOTTOMLEFT BENTEVEO - AMARILLO #FDCA32 PRENDIDO / #EDB04E APAGADO 
+  // 4 BOTTOMRIGHT CARDENAL - AZUL #066FB4 PRENDIDO / #90B3C1 APAGADO
+
+  // TIPOGRAFIA "luckiest guy regular"
+
+  const birds = ["Tero", "Hornero" , "Benteveo", "Cardenal"]
+  const birdsImages = ["/images/tero.png", "/images/hornero.png", "/images/benteveo.png", "/images/cardenal.png" ]
+  const birdSounds = ["/sounds/tero.mp3", "/sounds/hornero.mp3", "/sounds/benteveo.mp3", "/sounds/cardenal.mp3" ]
+  const birdColors = [ "bg-[#EB6351]", "bg-[#377261]", "bg-[#EDB04E]", "bg-[#90B3C1]"]
+  const birdActiveColors = ["bg-[#DA2B24]", "bg-[#179258]", "bg-[#FDCA32]", "bg-[#066FB4]"]
 
   useEffect(() => {
     // Cargar los sonidos
@@ -229,17 +236,14 @@ export default function SimonGame() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center p-4 bg-gradient-to-b from-sky-100 to-sky-200">
-      <Card className="w-full max-w-md">
+    <div className="flex min-h-screen flex-col items-center justify-center p-4 bg-gradient-to-b from-violet-300 to-violet-400">
+      <Card className="w-full max-w-lg">
         <CardHeader className="text-center">
-          <CardTitle className="text-3xl flex items-center justify-center gap-2">
-            <Bird className="h-8 w-8" />
-            Sinfonía de Pájaros
+          <CardTitle className="text-3xl luckiest-guy-regular flex items-center justify-center gap-y-2">
+            <span className="text-[#066FB4]">SINFONÍA</span>
+            <span className="text-[#FDCA32]">DE</span>
+            <span className="text-[#DA2B24]">PÁJAROS</span>
           </CardTitle>
-          <CardDescription>
-            Escuchá y repetí la secuencia de sonidos de pájaros.
-            {!gameStarted && !gameOver && "Puedes probar los sonidos antes de comenzar."}
-          </CardDescription>
         </CardHeader>
 
         <CardContent>          
@@ -252,29 +256,29 @@ export default function SimonGame() {
               className={`
                 relative
                 ${activeBird === birdIndex ? birdActiveColors[birdIndex] : birdColors[birdIndex]}
-                h-32 rounded-lg flex flex-col items-center justify-center transition-all duration-300 ease-in-out
+                h-46 rounded-lg flex flex-col items-center justify-center transition-all duration-300 ease-in-out
                 ${playingSequence || isPlayingSound ? (
                   currentPlayingBird === birdIndex
-                    ? "brightness-125 scale-105 shadow-lg ring-2 ring-offset-2"
-                    : "opacity-40 cursor-not-allowed outline-none"
+                    ? "scale-105 shadow-lg ring-2 ring-offset-2"
+                    : "cursor-not-allowed outline-none"
                 ) : "cursor-pointer"}
-                disabled:opacity-70 focus:outline-none focus:ring-2 focus:ring-offset-2
+                focus:outline-none focus:ring-2 focus:ring-offset-2
               `}
               aria-label={`Pájaro ${birdIndex + 1}`}
             >
               <img
                 src={birdsImages[birdIndex]}
                 alt={name}
-                className="h-22 w-full object-contain shadow-md drop-shadow-black/55"
+                className="h-34 w-full object-contain shadow-md drop-shadow-black/55"
               />
               <p className="font-bold text-white text-sm mt-2">{name}</p>
             </button>
           ))}
         </div>
 
-          <div className="flex justify-between items-center">
+          <div className="flex justify-center items-center">
             <div className="text-lg font-semibold">Nivel: {level}</div>
-            <div className="text-lg font-semibold">Récord: {highScore}</div>
+            {/* <div className="text-lg font-semibold">Récord: {highScore}</div> */}
           </div>
 
           {playingSequence && (
@@ -297,7 +301,7 @@ export default function SimonGame() {
                 Jugar de nuevo
               </span>
             ) : (
-              <span className="flex items-center gap-2">
+              <span className="flex items-center mx-auto gap-2">
                 <Play className="h-5 w-5" />
                 {level === 0 ? "Comenzar juego" : "Reiniciar juego"}
               </span>
@@ -310,8 +314,13 @@ export default function SimonGame() {
       <Dialog open={isStartDialogOpen} onOpenChange={setIsStartDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle className="text-2xl font-bold">Te damos la bienvenida a Sinfonía de Pájaros!</DialogTitle>
-            <DialogDescription className="text-black/80">
+            <DialogTitle className="luckiest-guy-regular">
+              <span className="text-lg text-black/80 mr-2">Te damos la bienvenida a</span>
+              <span className="text-[#066FB4]">SINFONÍA</span>
+              <span className="text-[#FDCA32]">DE</span>
+              <span className="text-[#DA2B24]">PÁJAROS</span>
+            </DialogTitle>
+            <DialogDescription className="text-black/80 font-semibold">
               Memorizá la secuencia de sonidos de los pájaros y repetíla correctamente. ¡Buena suerte!
             </DialogDescription>
           </DialogHeader>
@@ -329,8 +338,8 @@ export default function SimonGame() {
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle className="text-lg">Perdiste 😔 </DialogTitle>
-            <DialogDescription className="text-black/80 text-md">
+            <DialogTitle className="text-lg luckiest-guy-regular text-[#DA2B24]">Perdiste 😔 </DialogTitle>
+            <DialogDescription className="text-black/80 font-semibold text-md">
               Te equivocaste en la secuencia. ¿Querés jugar de nuevo?
             </DialogDescription>
           </DialogHeader>
@@ -351,8 +360,8 @@ export default function SimonGame() {
       <Dialog open={isWinDialogOpen} onOpenChange={setIsWinDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle className="text-lg">¡Felicidades! 🎉</DialogTitle>
-            <DialogDescription className="text-black/80 text-md">
+            <DialogTitle className="text-lg luckiest-guy-regular text-[#FDCA32]">¡Felicidades! 🎉</DialogTitle>
+            <DialogDescription className="text-black/80 font-semibold text-md">
               ¡Completaste el nivel 5, ya sos especialista en canto de pájaros!
             </DialogDescription>
           </DialogHeader>
