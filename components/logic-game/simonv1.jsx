@@ -13,6 +13,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog"
 
+
 export default function SimonGameLogic() {
   const [sequence, setSequence] = useState([])
   const [userSequence, setUserSequence] = useState([])
@@ -26,18 +27,25 @@ export default function SimonGameLogic() {
   const [isStartDialogOpen, setIsStartDialogOpen] = useState(true)
 
   const audioRefs = useRef([null, null, null, null])
+  const timeoutRefs = useRef([null, null, null, null])
 
-  const birds = ["Tero", "Hornero", "Benteveo", "Cardenal"];
-  const birdsImages = [ "/images/tero.png", "/images/hornero.png", "/images/benteveo.png", "/images/cardenal.png"];
-  const birdSounds = [ "/sounds/tero.mp3", "/sounds/hornero.mp3", "/sounds/benteveo.mp3", "/sounds/cardenal.mp3"];
-  const birdColors = [ "bg-[#EB6351]", "bg-[#377261]", "bg-[#EDB04E]", "bg-[#90B3C1]" ];
-  const birdActiveColors = [ "bg-[#DA2B24]", "bg-[#179258]", "bg-[#FDCA32]", "bg-[#066FB4]"];
+  const birds = ["Tero", "Hornero", "Benteveo", "Cardenal"]
+  const birdsImages = ["/images/tero.png", "/images/hornero.png", "/images/benteveo.png", "/images/cardenal.png"]
+  const birdSounds = ["/sounds/tero.mp3", "/sounds/hornero.mp3", "/sounds/benteveo.mp3", "/sounds/cardenal.mp3"]
+  const birdColors = ["bg-[#EB6351]", "bg-[#377261]", "bg-[#EDB04E]", "bg-[#90B3C1]"]
+  const birdActiveColors = ["bg-[#DA2B24]", "bg-[#179258]", "bg-[#FDCA32]", "bg-[#066FB4]"]
 
   useEffect(() => {
     // Cargar los sonidos
     birdSounds.forEach((sound, index) => {
       const audio = new Audio(sound)
       audio.preload = "auto"
+
+      // Manejar errores de carga
+      audio.addEventListener("error", () => {
+        console.warn(`Error cargando audio ${index}: ${sound}`)
+      })
+
       audioRefs.current[index] = audio
     })
 
@@ -46,38 +54,101 @@ export default function SimonGameLogic() {
     if (savedHighScore) {
       setHighScore(Number.parseInt(savedHighScore))
     }
+
+    // Cleanup al desmontar
+    return () => {
+      audioRefs.current.forEach((audio) => {
+        if (audio) {
+          audio.pause()
+          audio.currentTime = 0
+        }
+      })
+      timeoutRefs.current.forEach((timeout) => {
+        if (timeout) {
+          clearTimeout(timeout)
+        }
+      })
+    }
   }, [])
 
-  // Función para reproducir sonido con Promise
+  // Función mejorada para reproducir sonido con mejor manejo de errores
   const playSound = useCallback((index) => {
     return new Promise((resolve) => {
       if (!audioRefs.current[index]) {
+        console.warn(`Audio ${index} no disponible`)
         resolve()
         return
       }
 
-      setCurrentPlayingBird(index)
       const audio = audioRefs.current[index]
-      audio.currentTime = 0
-      audio.play()
 
-      const handleEnded = () => {
+      // Limpiar timeout anterior si existe
+      if (timeoutRefs.current[index]) {
+        clearTimeout(timeoutRefs.current[index])
+        timeoutRefs.current[index] = null
+      }
+
+      // Función para limpiar y resolver
+      const cleanup = () => {
         setCurrentPlayingBird(null)
-        audio.removeEventListener("ended", handleEnded)
+        if (timeoutRefs.current[index]) {
+          clearTimeout(timeoutRefs.current[index])
+          timeoutRefs.current[index] = null
+        }
         resolve()
       }
 
-      audio.addEventListener("ended", handleEnded)
+      setCurrentPlayingBird(index)
 
-      // Limitar la reproducción a 500ms máximo
-      setTimeout(() => {
-        if (!audio.paused) {
-          audio.pause()
-          audio.currentTime = 0
-          setCurrentPlayingBird(null)
-          resolve()
+      try {
+        audio.currentTime = 0
+
+        const playPromise = audio.play()
+
+        // Manejar promesa de play (navegadores modernos)
+        if (playPromise !== undefined) {
+          playPromise
+            .then(() => {
+              // Audio comenzó a reproducirse correctamente
+            })
+            .catch((error) => {
+              console.warn(`Error reproduciendo audio ${index}:`, error)
+              cleanup()
+            })
         }
-      }, 1500)
+
+        // Event listener para cuando termina el audio
+        const handleEnded = () => {
+          audio.removeEventListener("ended", handleEnded)
+          audio.removeEventListener("error", handleError)
+          cleanup()
+        }
+
+        // Event listener para errores
+        const handleError = () => {
+          audio.removeEventListener("ended", handleEnded)
+          audio.removeEventListener("error", handleError)
+          console.warn(`Error durante reproducción de audio ${index}`)
+          cleanup()
+        }
+
+        audio.addEventListener("ended", handleEnded)
+        audio.addEventListener("error", handleError)
+
+        // Timeout de seguridad más corto y confiable
+        timeoutRefs.current[index] = setTimeout(() => {
+          if (!audio.paused) {
+            audio.pause()
+            audio.currentTime = 0
+          }
+          audio.removeEventListener("ended", handleEnded)
+          audio.removeEventListener("error", handleError)
+          cleanup()
+        }, 1200) // Reducido de 1500ms a 800ms
+      } catch (error) {
+        console.warn(`Error iniciando reproducción de audio ${index}:`, error)
+        cleanup()
+      }
     })
   }, [])
 
@@ -101,15 +172,18 @@ export default function SimonGameLogic() {
           await highlightBird(sequenceToPlay[i])
           // Pausa entre sonidos
           if (i < sequenceToPlay.length - 1) {
-            await new Promise((resolve) => setTimeout(resolve, 300))
+            await new Promise((resolve) => setTimeout(resolve, 400))
           }
         }
 
         // Pequeña pausa antes de permitir input del usuario
-        await new Promise((resolve) => setTimeout(resolve, 500))
+        await new Promise((resolve) => setTimeout(resolve, 600))
         setGameState("waiting-input")
       } catch (error) {
         console.error("Error al reproducir secuencia:", error)
+        // Asegurar que el estado se resetee en caso de error
+        setCurrentPlayingBird(null)
+        setActiveBird(null)
         setGameState("waiting-input")
       }
     },
@@ -172,46 +246,51 @@ export default function SimonGameLogic() {
 
       setGameState("processing-input")
 
-      // Reproducir sonido del pájaro clickeado
-      await highlightBird(index)
+      try {
+        // Reproducir sonido del pájaro clickeado
+        await highlightBird(index)
 
-      // Agregar a la secuencia del usuario
-      const newUserSequence = [...userSequence, index]
-      setUserSequence(newUserSequence)
+        // Agregar a la secuencia del usuario
+        const newUserSequence = [...userSequence, index]
+        setUserSequence(newUserSequence)
 
-      // Verificar si la entrada es correcta
-      const currentIndex = newUserSequence.length - 1
-      if (newUserSequence[currentIndex] !== sequence[currentIndex]) {
-        // Entrada incorrecta - terminar juego
-        setGameState("game-over")
-        setIsDialogOpen(true)
-        return
-      }
-
-      // Verificar si completó la secuencia
-      if (newUserSequence.length === sequence.length) {
-        setGameState("level-complete")
-
-        // Verificar si ganó el juego (nivel 6)
-        if (level === 5) {
-          setIsWinDialogOpen(true)
+        // Verificar si la entrada es correcta
+        const currentIndex = newUserSequence.length - 1
+        if (newUserSequence[currentIndex] !== sequence[currentIndex]) {
+          // Entrada incorrecta - terminar juego
+          setGameState("game-over")
+          setIsDialogOpen(true)
           return
         }
 
-        // Actualizar high score si es necesario
-        if (level > highScore) {
-          const newHighScore = level
-          setHighScore(newHighScore)
-          localStorage.setItem("simonBirdHighScore", newHighScore.toString())
-        }
+        // Verificar si completó la secuencia
+        if (newUserSequence.length === sequence.length) {
+          setGameState("level-complete")
 
-        // Continuar al siguiente nivel después de una pausa
-        setTimeout(() => {
-          setUserSequence([])
-          addToSequence()
-        }, 1000)
-      } else {
-        // Continuar esperando más input
+          // Verificar si ganó el juego (nivel 5)
+          if (level === 5) {
+            setIsWinDialogOpen(true)
+            return
+          }
+
+          // Actualizar high score si es necesario
+          if (level > highScore) {
+            const newHighScore = level
+            setHighScore(newHighScore)
+            localStorage.setItem("simonBirdHighScore", newHighScore.toString())
+          }
+
+          // Continuar al siguiente nivel después de una pausa
+          setTimeout(() => {
+            setUserSequence([])
+            addToSequence()
+          }, 1000)
+        } else {
+          // Continuar esperando más input
+          setGameState("waiting-input")
+        }
+      } catch (error) {
+        console.error("Error en handleBirdClick:", error)
         setGameState("waiting-input")
       }
     },
@@ -220,11 +299,15 @@ export default function SimonGameLogic() {
 
   // Función para iniciar juego
   const startGame = useCallback(() => {
-    // Detener cualquier audio que esté reproduciéndose
-    audioRefs.current.forEach((audio) => {
+    // Detener cualquier audio que esté reproduciéndose y limpiar timeouts
+    audioRefs.current.forEach((audio, index) => {
       if (audio) {
         audio.pause()
         audio.currentTime = 0
+      }
+      if (timeoutRefs.current[index]) {
+        clearTimeout(timeoutRefs.current[index])
+        timeoutRefs.current[index] = null
       }
     })
 
@@ -244,25 +327,6 @@ export default function SimonGameLogic() {
     }, 800)
   }, [addToSequence])
 
-  // Función para terminar juego
-  const gameEnd = useCallback(() => {
-    setGameState("game-over")
-
-    // Detener cualquier sonido
-    audioRefs.current.forEach((audio) => {
-      if (audio) {
-        audio.pause()
-        audio.currentTime = 0
-      }
-    })
-
-    // Actualizar high score si es necesario
-    if (level > highScore) {
-      setHighScore(level)
-      localStorage.setItem("simonBirdHighScore", level.toString())
-    }
-  }, [level, highScore])
-
   // Determinar si un botón debe estar deshabilitado
   const isButtonDisabled = useCallback(
     (birdIndex) => {
@@ -271,16 +335,9 @@ export default function SimonGameLogic() {
     [gameState, currentPlayingBird],
   )
 
-  // Inicializar primer nivel cuando el juego está idle y no hay secuencia
-  useEffect(() => {
-    if (gameState === "idle" && sequence.length === 0 && level === 0) {
-      // El juego se iniciará cuando se llame a startGame()
-    }
-  }, [gameState, sequence.length, level])
-
   return (
     <div className="flex min-h-screen flex-col items-center justify-center p-4 bg-gradient-to-b from-[#87367b8e] to-[#87367b6a] select-none">
-      <Card className="w-full max-w-lg shadow-xl" >
+      <Card className="w-full max-w-lg shadow-xl">
         <CardHeader className="text-center">
           <CardTitle className="text-3xl luckiest-guy-regular flex items-center justify-center gap-y-2">
             <span className="text-[#066FB4]">SINFONÍA</span>
@@ -380,7 +437,10 @@ export default function SimonGameLogic() {
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button className="bg-[#87367B] hover:bg-[#7c3e73] cursor-pointer" onClick={() => setIsStartDialogOpen(false)}>
+            <Button
+              className="bg-[#87367B] hover:bg-[#7c3e73] cursor-pointer"
+              onClick={() => setIsStartDialogOpen(false)}
+            >
               Comenzar
             </Button>
           </DialogFooter>
@@ -414,7 +474,9 @@ export default function SimonGameLogic() {
       <Dialog open={isWinDialogOpen} onOpenChange={setIsWinDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle className="text-lg font-bold text-[#e4ae0b] luckiest-guy-regular">¡Felicidades! 🎉</DialogTitle>
+            <DialogTitle className="text-lg font-bold text-[#e4ae0b] luckiest-guy-regular">
+              ¡Felicidades! 🎉
+            </DialogTitle>
             <DialogDescription className="text-black/80 font-semibold text-md">
               ¡Completaste el nivel 5, ya sos especialista en canto de pájaros!
             </DialogDescription>
@@ -433,5 +495,5 @@ export default function SimonGameLogic() {
         </DialogContent>
       </Dialog>
     </div>
-  );
+  )
 }
