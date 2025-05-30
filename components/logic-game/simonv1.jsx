@@ -145,7 +145,7 @@ export default function SimonGameLogic() {
       return new Promise((resolve) => {
         if (!audioEnabled || !audioRefs.current[index]) {
           // Modo silencioso - solo mostrar visual
-          setTimeout(resolve, 600)
+          setTimeout(resolve, 1500)
           return
         }
 
@@ -213,7 +213,7 @@ export default function SimonGameLogic() {
             audio.removeEventListener("ended", handleEnded)
             audio.removeEventListener("error", handleError)
             cleanup()
-          }, 800)
+          }, 1500)
         } catch (error) {
           console.warn(`Error iniciando reproducción de audio ${index}:`, error)
           cleanup()
