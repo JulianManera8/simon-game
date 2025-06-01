@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from "react"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Play, RefreshCw, VolumeX } from "lucide-react"
 import {
   Dialog,
@@ -435,6 +435,10 @@ export default function SimonGameLogic() {
             <span className="text-[#FDCA32]">DE</span>
             <span className="text-[#DA2B24]">PÁJAROS</span>
           </CardTitle>
+          <CardDescription>
+            Escuchá y repetí la secuencia de los sonidos de los pájaros. <br />
+            ¡Buena suerte!
+          </CardDescription>
           {!audioEnabled && (
             <div className="flex items-center justify-center gap-2 text-sm text-gray-600 mt-2">
               <VolumeX className="h-4 w-4" />
