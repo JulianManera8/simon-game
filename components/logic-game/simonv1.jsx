@@ -544,17 +544,17 @@ export default function SimonGameLogic() {
           <DialogHeader>
             {/* Bloque gris mientras carga */}
             {!showLogos ? (
-              <div className="flex justify-center items-center h-[140px]">
-                <div className="w-full h-[100px] bg-gray-300 animate-pulse rounded-md" />
+              <div className="flex justify-center items-center h-[140px] mb-2">
+                <div className="w-full max-w-[340px] h-[100px] bg-gray-300 animate-pulse rounded-md" />
               </div>
             ) : (
-              <div className="flex items-center justify-center mb-2 gap-4">
+              <div className="flex items-center justify-center mb-2 max-w-[600px] mx-auto">
                 {/* Logo redondo */}
                 <div className="flex justify-center items-center w-1/2">
                   <Image
                     src="/logo.png"
-                    width={140}
-                    height={140}
+                    width={150}
+                    height={150}
                     alt="logo"
                     onLoadingComplete={() => setLogoLoaded(true)}
                   />
@@ -564,8 +564,9 @@ export default function SimonGameLogic() {
                 <div className="flex justify-center items-center w-1/2">
                   <Image
                     src="/logo-3lineas.png"
-                    width={200}
-                    height={80}
+                    className="w-full h-full"
+                    width={250}
+                    height={250}
                     alt="logo texto"
                     onLoadingComplete={() => setLogoTextLoaded(true)}
                   />
@@ -579,7 +580,7 @@ export default function SimonGameLogic() {
               Memorizá la secuencia de sonidos de los pájaros y repetíla correctamente.
             </DialogDescription>
           </DialogHeader>
-              
+          
           <DialogFooter>
             <Button
               className="bg-[#87367B] hover:bg-[#7c3e73] cursor-pointer touch-manipulation"
@@ -590,6 +591,7 @@ export default function SimonGameLogic() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
 
 
       {/* Dialog de Game Over */}
