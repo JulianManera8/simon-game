@@ -12,7 +12,7 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog"
-
+import Image from "next/image"
 
 export default function SimonGameLogic() {
   const [sequence, setSequence] = useState([])
@@ -431,9 +431,22 @@ export default function SimonGameLogic() {
       <Card className="w-full max-w-lg shadow-xl">
         <CardHeader className="text-center">
           <CardTitle className="text-3xl luckiest-guy-regular flex items-center justify-center gap-y-2">
-            <span className="text-[#066FB4]">SINFONÍA</span>
-            <span className="text-[#FDCA32]">DE</span>
-            <span className="text-[#DA2B24]">PÁJAROS</span>
+            <div className="flex items-center justify-center gap-4 mb-2">
+              <Image 
+                src="/logo-texto.png"
+                width={200}
+                height={200}
+                alt="logo texto"
+                className="w-auto h-12"
+              />
+              <Image 
+                src="/logo.png"
+                width={80}
+                height={80}
+                alt="logo"
+                className="w-16 h-16"
+              />
+            </div>
           </CardTitle>
           <CardDescription>
             Escuchá y repetí la secuencia de los sonidos de los pájaros. <br />
@@ -527,15 +540,29 @@ export default function SimonGameLogic() {
 
       {/* Pantalla de Inicio */}
       <Dialog open={isStartDialogOpen} onOpenChange={setIsStartDialogOpen}>
-        <DialogContent>
+        <DialogContent className="[&>button[aria-label='Close']]:hidden">
           <DialogHeader>
-            <DialogTitle className="font-bold luckiest-guy-regular">
-              <span className="text-lg text-black/80 mr-2">Te damos la bienvenida a</span>
-              <span className="text-[#066FB4]">SINFONÍA </span>
-              <span className="text-[#FDCA32]">DE </span>
-              <span className="text-[#DA2B24]">PÁJAROS</span>
+            {/* Logo e imagen fuera del Title */}
+            <div className="flex items-center justify-center gap-4 mb-2">
+              <Image 
+                src="/logo-texto.png"
+                width={200}
+                height={200}
+                alt="logo texto"
+                className="w-auto h-12"
+              />
+              <Image 
+                src="/logo.png"
+                width={80}
+                height={80}
+                alt="logo"
+                className="w-16 h-16"
+              />
+            </div>
+            <DialogTitle className="hidden">
+              .
             </DialogTitle>
-            <DialogDescription className="text-black/80 font-semibold">
+            <DialogDescription className="text-black/80 font-semibold text-center">
               Memorizá la secuencia de sonidos de los pájaros y repetíla correctamente.
               {!audioInitialized && (
                 <span className="block mt-2 text-sm text-gray-600">
@@ -544,6 +571,7 @@ export default function SimonGameLogic() {
               )}
             </DialogDescription>
           </DialogHeader>
+            
           <DialogFooter>
             <Button
               className="bg-[#87367B] hover:bg-[#7c3e73] cursor-pointer touch-manipulation"
