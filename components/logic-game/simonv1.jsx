@@ -433,13 +433,6 @@ export default function SimonGameLogic() {
           <CardTitle className="text-3xl luckiest-guy-regular flex items-center justify-center gap-y-2">
             <div className="flex items-center justify-center gap-4 mb-2">
               <Image 
-                src="/logo-texto.png"
-                width={200}
-                height={200}
-                alt="logo texto"
-                className="w-auto h-12"
-              />
-              <Image 
                 src="/logo.png"
                 width={80}
                 height={80}
@@ -448,7 +441,7 @@ export default function SimonGameLogic() {
               />
             </div>
           </CardTitle>
-          <CardDescription>
+          <CardDescription className="hidden">
             Escuchá y repetí la secuencia de los sonidos de los pájaros. <br />
             ¡Buena suerte!
           </CardDescription>
@@ -540,28 +533,33 @@ export default function SimonGameLogic() {
 
       {/* Pantalla de Inicio */}
       <Dialog open={isStartDialogOpen} onOpenChange={setIsStartDialogOpen}>
-        <DialogContent className="[&>button[aria-label='Close']]:hidden">
+        <DialogContent className="[&>button[aria-label='Close']]:hidden max-w-[60%] min-w-fit h-fit">
           <DialogHeader>
-            {/* Logo e imagen fuera del Title */}
-            <div className="flex items-center justify-center gap-4 mb-2">
-              <Image 
-                src="/logo-texto.png"
-                width={200}
-                height={200}
-                alt="logo texto"
-                className="w-auto h-12"
-              />
-              <Image 
-                src="/logo.png"
-                width={80}
-                height={80}
-                alt="logo"
-                className="w-16 h-16"
-              />
+            {/* Contenedor flex dividido en 2 mitades */}
+            <div className="flex items-center justify-center mb-2">
+              <div className="flex justify-center items-center">
+                <Image 
+                  src="/logo-3lineas.png"
+                  width={200}
+                  height={200}
+                  alt="logo texto"
+                  className="w-full max-w-[80%]"
+                />
+              </div>
+              <div className="flex justify-center items-center mr-3">
+                <Image 
+                  src="/logo.png"
+                  width={140}
+                  height={140}
+                  alt="logo"
+                  className="w-full  max-w-[150px]"
+                />
+              </div>
             </div>
-            <DialogTitle className="hidden">
-              .
-            </DialogTitle>
+
+            {/* Ocultamos el título para no romper semántica */}
+            <DialogTitle className="hidden">.</DialogTitle>
+
             <DialogDescription className="text-black/80 font-semibold text-center">
               Memorizá la secuencia de sonidos de los pájaros y repetíla correctamente.
               {!audioInitialized && (
@@ -582,6 +580,7 @@ export default function SimonGameLogic() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
 
       {/* Dialog de Game Over */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
