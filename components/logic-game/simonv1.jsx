@@ -27,7 +27,10 @@ export default function SimonGameLogic() {
   const [isStartDialogOpen, setIsStartDialogOpen] = useState(true)
   const [audioEnabled, setAudioEnabled] = useState(true)
   const [audioInitialized, setAudioInitialized] = useState(false)
-
+  const [logoLoaded, setLogoLoaded] = useState(false);
+  const [logoTextLoaded, setLogoTextLoaded] = useState(false);
+  const [showLogos, setShowLogos] = useState(false)
+  
   const audioRefs = useRef([null, null, null, null])
   const timeoutRefs = useRef([null, null, null, null])
   const audioContextRef = useRef(null)
@@ -119,6 +122,10 @@ export default function SimonGameLogic() {
     if (savedHighScore) {
       setHighScore(Number.parseInt(savedHighScore))
     }
+
+    setTimeout(() => {
+      setShowLogos(true)
+    }, 1500);
 
     // Cleanup al desmontar
     return () => {
@@ -533,43 +540,46 @@ export default function SimonGameLogic() {
 
       {/* Pantalla de Inicio */}
       <Dialog open={isStartDialogOpen} onOpenChange={setIsStartDialogOpen}>
-        <DialogContent className="[&>button[aria-label='Close']]:hidden max-w-[60%] min-w-fit h-fit">
+        <DialogContent className="[&>button[aria-label='Close']]:hidden max-w-[60%] min-w-[80%] md:min-w-fit md:h-fit">
           <DialogHeader>
-            {/* Contenedor flex dividido en 2 mitades */}
-            <div className="flex items-center justify-center mb-2">
-              <div className="flex justify-center items-center">
-                <Image 
-                  src="/logo-3lineas.png"
-                  width={200}
-                  height={200}
-                  alt="logo texto"
-                  className="w-full max-w-[80%]"
-                />
+            {/* Bloque gris mientras carga */}
+            {!showLogos ? (
+              <div className="flex justify-center items-center h-[140px]">
+                <div className="w-full h-[100px] bg-gray-300 animate-pulse rounded-md" />
               </div>
-              <div className="flex justify-center items-center mr-3">
-                <Image 
-                  src="/logo.png"
-                  width={140}
-                  height={140}
-                  alt="logo"
-                  className="w-full  max-w-[150px]"
-                />
+            ) : (
+              <div className="flex items-center justify-center mb-2 gap-4">
+                {/* Logo redondo */}
+                <div className="flex justify-center items-center w-1/2">
+                  <Image
+                    src="/logo.png"
+                    width={140}
+                    height={140}
+                    alt="logo"
+                    onLoadingComplete={() => setLogoLoaded(true)}
+                  />
+                </div>
+            
+                {/* Logo de 3 líneas */}
+                <div className="flex justify-center items-center w-1/2">
+                  <Image
+                    src="/logo-3lineas.png"
+                    width={200}
+                    height={80}
+                    alt="logo texto"
+                    onLoadingComplete={() => setLogoTextLoaded(true)}
+                  />
+                </div>
               </div>
-            </div>
+            )}
 
-            {/* Ocultamos el título para no romper semántica */}
             <DialogTitle className="hidden">.</DialogTitle>
-
-            <DialogDescription className="text-black/80 font-semibold text-center">
+          
+            <DialogDescription className="text-black/80 font-semibold text-center md:text-lg text-sm">
               Memorizá la secuencia de sonidos de los pájaros y repetíla correctamente.
-              {!audioInitialized && (
-                <span className="block mt-2 text-sm text-gray-600">
-                  Nota: En dispositivos móviles, toca "Comenzar" para activar el audio.
-                </span>
-              )}
             </DialogDescription>
           </DialogHeader>
-            
+              
           <DialogFooter>
             <Button
               className="bg-[#87367B] hover:bg-[#7c3e73] cursor-pointer touch-manipulation"
