@@ -548,7 +548,7 @@ export default function SimonGameLogic() {
                 <div className="w-full max-w-[340px] h-[100px] bg-gray-300 animate-pulse rounded-md" />
               </div>
             ) : (
-              <div className="flex items-center justify-center mb-2 max-w-[600px] mx-auto">
+              <div className="flex items-center justify-center mb-2 gap-x-2 max-w-[600px] mx-auto">
                 {/* Logo redondo */}
                 <div className="flex justify-center items-center w-1/2">
                   <Image
@@ -564,7 +564,7 @@ export default function SimonGameLogic() {
                 <div className="flex justify-center items-center w-1/2">
                   <Image
                     src="/logo-3lineas.png"
-                    className="w-full h-full"
+                    className="w-full h-full min-w-full"
                     width={250}
                     height={250}
                     alt="logo texto"
