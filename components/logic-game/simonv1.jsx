@@ -576,7 +576,7 @@ export default function SimonGameLogic() {
             <DialogTitle className="hidden">.</DialogTitle>
           
             <DialogDescription className="text-black/80 font-semibold text-center md:text-lg text-sm">
-              Memorizá la secuencia de sonidos de los pájaros y repetíla correctamente.
+              Memorizá la secuencia de sonidos de los pájaros y repetila correctamente.
             </DialogDescription>
           </DialogHeader>
               

@@ -12,7 +12,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
-  title: "Simon - Pájaros",
+  title: "Sinfonía",
 };
 
 export default function RootLayout({ children }) {
